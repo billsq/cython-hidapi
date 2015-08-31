@@ -1,8 +1,11 @@
 from libc.stddef cimport wchar_t, size_t
+import sys
 
 cdef extern from "hidapi.h":
   ctypedef struct hid_device:
     pass
+    
+  ctypedef void (*raw_data_cb)(unsigned char *data, int length, void *context)
 
   cdef struct hid_device_info:
     char *path
@@ -27,6 +30,7 @@ cdef extern from "hidapi.h":
   int hid_read(hid_device* device, unsigned char* data, int max_length) nogil
   int hid_read_timeout(hid_device* device, unsigned char* data, int max_length, int milliseconds) nogil
   int hid_set_nonblocking(hid_device* device, int value)
+  int hid_set_raw_data_handler(hid_device *device, raw_data_cb callback, void *context)
   int hid_send_feature_report(hid_device* device, unsigned char *data, int length) nogil
   int hid_get_feature_report(hid_device* device, unsigned char *data, int length) nogil
 

@@ -1,4 +1,5 @@
 import sys
+from threading import Thread
 from chid cimport *
 from libc.stddef cimport wchar_t, size_t
 from cpython.unicode cimport PyUnicode_FromUnicode
@@ -40,6 +41,11 @@ def enumerate(vendor_id=0, product_id=0):
     c = c.next
   hid_free_enumeration(info)
   return res
+
+cdef void c_raw_data_callback(unsigned char *data, int length, void *context):
+  if context:
+    res = [data[i] for i in range(length)]
+    Thread(target=<object>context, args=(res,)).start()
 
 cdef class device:
   cdef hid_device *_c_hid
@@ -90,6 +96,10 @@ cdef class device:
   def set_nonblocking(self, v):
       '''Set the nonblocking flag'''
       return hid_set_nonblocking(self._c_hid, v)
+      
+  def set_raw_data_handler(self, handler):
+      '''Set the raw input report handler'''
+      hid_set_raw_data_handler(self._c_hid, c_raw_data_callback, <void *>handler)
 
   def read(self, max_length, timeout_ms = 0):
       '''Return a list of integers (0-255) from the device up to max_length bytes.'''
