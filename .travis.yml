@@ -17,17 +17,19 @@ addons:
             - libusb-1.0-0-dev
 
 python:
-    - "2.6"
     - "2.7"
-    - "3.2"
-    - "3.3"
     - "3.4"
+    - "3.5"
 
 install:
     # Optimisation: build requirements as wheels, which get cached by Travis
-    - pip install "pip>=7.0" wheel
+    - pip install "pip>=8.0" "wheel" "setuptools>=19.0"
     - pip install -r requirements.txt
 
+env:
+    - EXTRAOPTION=
+    - EXTRAOPTION=--without-libusb
+
 script:
-    - python setup.py install
+    - python setup.py install $EXTRAOPTION
     - python tests.py
